@@ -1,5 +1,17 @@
 
+# TODO play around with this in next iteration - pattern matching on
+# hash keys. It'll need some rethinking, since dot notation won't work -
+# conflicts with regex.
 
+#class Hash
+#  def has_rkey?(search)
+#  end
+#  # This one will complicate things as it means we'll potentially need to
+#  # descend down multiple matching branches and capture results
+#  def at_rkey(search)
+#  end
+#end
+#
 module Dbi
   class DbiShow < Chef::Knife
     banner "knife dbi show DATABAG ITEM KEY"
@@ -97,13 +109,7 @@ EOS
 
       newdata = data[key]
       raise "failed at #{prettydone}, could not find value at #{prettykey}" if newdata.nil?
-
-      if keys.length > 0
-        raise "failed at #{prettydone} - '#{newdata}' at '#{prettykey}' is a terminal value, I can't look further" unless has_children?(data)
-      else
-        # Okay, we're at our terminus - here's the value we want.
-        return newdata
-      end
+      return newdata if keys.length == 0
       return value(newdata, keys, (done.length > 0 ? "#{done}.#{key}" : key))
     end
 
