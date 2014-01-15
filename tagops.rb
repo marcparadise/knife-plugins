@@ -1,19 +1,19 @@
 require "chef/search/query"
 
 module Tagops
-  class TagopsRemoveall < Chef::Knife
-    banner 'knife tagops removeall TAG'
+  class TagopsRemovebyrole < Chef::Knife
+    banner 'knife tagops removebyrole ROLE TAG'
     option :usage,
       :long => "--usage",
       :short => "-u",
       :boolean => true,
       :proc => Proc.new{|x|
     puts <<EOS
-Use to assign TAG to any nodes that are assigned ROLE and not yet assigned TAG.
+Use to remove TAG from any nodes in ROLE that have it assigned.
 
 For example:
 
-knife tagops removeall sometagname
+knife tagops removeall my-role sometagname
 EOS
     }
     deps do
@@ -21,13 +21,13 @@ EOS
 
     def run
       return if config[:usage]
-      raise "Usage: knife tagops removeall TAG-NAME" if name_args.length != 1
-      tag = name_args[0]
+      raise "Usage: knife tagops removebyrole ROLE-NAME TAG-NAME" if name_args.length != 2
+      role, tag = name_args
 
       @searcher ||= Chef::Search::Query.new
-      nodes = @searcher.search(:node, "tags:#{tag}")[0]
+      nodes = @searcher.search(:node, "role:#{role} AND tags:#{tag}")[0]
       if nodes.length == 0
-        puts ui.color("No nodes found tag #{tag}", :yellow)
+        puts ui.color("No nodes in role #{role} found with tag #{tag}", :yellow)
         return
       end
 
@@ -37,7 +37,6 @@ EOS
         node.save
       end
     end
-
   end
   class TagopsCreatebyrole < Chef::Knife
     banner 'knife tagops createbyrole TAG'
